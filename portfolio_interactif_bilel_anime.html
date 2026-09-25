@@ -1503,10 +1503,13 @@ void main(){
       s.plate = 0;
     };
     const lift = v => {                 // il soulève le casque : fondu casque d'origine → casque tenu
-      // Le fondu n'intervient qu'en toute fin de geste, une fois le casque d'origine
-      // presque entièrement amené sur la pose "tenue" (sinon les deux images se
-      // superposent à des positions différentes et donnent une impression de dédoublement).
-      const e = easeInOut(v), d = sstep(0.8, 0.97, v);
+      // Le découpage du casque d'origine n'a de bords propres qu'à sa position de
+      // départ (ils épousent alors le contour de la tête) : au-delà d'une légère
+      // rotation, ces bords deviennent visibles et paraissent déchiquetés. Le fondu
+      // se déclenche donc tôt et rapidement, pendant que la rotation reste minime ;
+      // c'est ensuite l'image "casque tenu" (dessinée, bords propres) qui prend le
+      // relais et poursuit seule le mouvement jusqu'à sa position finale.
+      const e = easeInOut(v), d = sstep(0.08, 0.22, v);
       s.plate = 1; s.casque = 1 - d; s.casqueK = e;
       s.retrait = d; s.main = v < 0.999 ? 1 : 0;
       s.a = 0; s.b = 0; s.tx = 0; s.ty = 0; s.k = e - 1; s.raise3 = 1;
