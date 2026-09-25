@@ -1497,9 +1497,13 @@ void main(){
       s.main = sstep(0, 0.22, v);
       s.a = lerp(ARM3.hideA, 0, e); s.b = lerp(ARM3.hideB, 0, e);
       s.tx = lerp(ARM3.hideT[0], 0, e); s.ty = lerp(ARM3.hideT[1], 0, e);
-      // L'épaule fixe suit la même courbe que la rotation du bras : elle n'apparaît
-      // que lorsque le bras déformé a rejoint sa pose finale (sinon les deux se désynchronisent).
-      s.k = -1; s.raise3 = clamp(e, 0, 1);
+      // L'épaule fixe (retraitFixe) est toujours dessinée à sa position finale, immobile :
+      // son opacité seule ne doit monter qu'une fois le bras déformé presque arrivé à cette
+      // même position (easeOutBack grimpe très vite puis dépasse sa cible avant de revenir :
+      // le lier directement à "e" la rendait visible bien avant que le bras ait rejoint sa
+      // place, d'où un bras/manche fantôme et translucide). On la cale donc sur la fin du
+      // geste plutôt que sur "e", pour que le résidu de décalage soit déjà minime.
+      s.k = -1; s.raise3 = sstep(0.82, 1, v);
       s.plate = 0;
     };
     const lift = v => {                 // il soulève le casque : fondu casque d'origine → casque tenu
@@ -1538,7 +1542,7 @@ void main(){
       case "regard": s.dir = LOOK_VISITOR; break;
       case "salutMontee": {
         const e = easeOutBack(u);
-        s.salut = sstep(0, 0.2, u); s.c = lerp(ARM2.hideC, 0, e); s.raise2 = clamp(e, 0, 1);
+        s.salut = sstep(0, 0.2, u); s.c = lerp(ARM2.hideC, 0, e); s.raise2 = sstep(0.82, 1, u);
         s.dir = LOOK_VISITOR; break;
       }
       case "salut": {
